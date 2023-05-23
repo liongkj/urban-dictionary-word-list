@@ -27,17 +27,15 @@ def extract_page_entries(html):
     # find word list element, this might change in the future
     ul = soup.find_all("ul", class_="mt-3 columns-2 md:columns-3")[0]
     for li in ul.find_all("li"):
-        a = li.find("a").string
-        if a:
+        if a := li.find("a").string:
             yield a
 
 
 def get_next(html):
     soup = BeautifulSoup(html, "html.parser")
-    next_link = soup.find("a", {"rel": "next"})
-    if next_link:
+    if next_link := soup.find("a", {"rel": "next"}):
         href = next_link["href"]
-        return "https://www.urbandictionary.com" + href
+        return f"https://www.urbandictionary.com{href}"
     return None
 
 
@@ -120,7 +118,5 @@ args = parser.parse_args()
 letters = [letter.upper() for letter in args.letters]
 if not letters:
     with open(args.ifile, "r") as ifile:
-        for row in ifile:
-            letters.append(row.strip())
-
+        letters.extend(row.strip() for row in ifile)
 download_entries(letters, args.out, args.remove_dead)
